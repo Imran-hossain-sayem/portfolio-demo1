@@ -45,7 +45,7 @@ export const projects = [
     image: resultPredictor,
     tech: ['Python', 'Flask', 'Scikit-learn', 'Hugging Face'],
     github: 'https://github.com/Imran-hossain-sayem',
-    demo: 'https://huggingface.co/spaces',
+    demo: 'https://huggingface.co/spaces/Md-imran-hossain-156/HSC-RESULT-PREDICTOR',
   },
   {
     title: 'Personal Portfolio Website',

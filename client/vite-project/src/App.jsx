@@ -27,6 +27,7 @@ const navItems = [
 function App() {
   const [activeSection, setActiveSection] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [typedRole, setTypedRole] = useState(profile.headline.split(" • ")[0]);
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [formStatus, setFormStatus] = useState("");
@@ -57,6 +58,31 @@ function App() {
     );
 
     sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 24);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const revealItems = document.querySelectorAll(".reveal");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    revealItems.forEach((item) => observer.observe(item));
     return () => observer.disconnect();
   }, []);
 
@@ -102,7 +128,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <header className="topbar">
+      <header className={`topbar ${scrolled ? "scrolled" : ""}`}>
         <a className="brand" href="#home" onClick={() => setMenuOpen(false)}>
           <span className="brand-mark">◉</span>
           <span>{profile.name}</span>
@@ -135,9 +161,10 @@ function App() {
       </header>
 
       <main>
-        <section className="hero content-section" id="home">
+        <section className="hero content-section reveal" id="home">
           <div className="hero-copy">
             <p className="eyebrow">Available for AI, research, and software opportunities</p>
+            <p className="hero-role">{profile.role}</p>
             <h1>
               Hello,
               <br />
@@ -148,9 +175,7 @@ function App() {
               <span className="typing-cursor">|</span>
             </div>
             <p className="hero-intro">
-              I am a Computer Science student building toward a career in AI engineering,
-              machine learning, deep learning, and computer vision through practical projects,
-              thoughtful software design, and research-oriented exploration.
+              {profile.intro}
             </p>
             <div className="hero-actions">
               <a className="btn btn-primary" href={profile.resume || "#contact"}>
@@ -182,7 +207,7 @@ function App() {
           </div>
         </section>
 
-        <section className="content-section" id="about">
+        <section className="content-section reveal" id="about">
           <SectionTitle
             eyebrow="About"
             title="Crafting intelligent systems with curiosity and purpose"
@@ -190,7 +215,7 @@ function App() {
           />
 
           <div className="about-grid">
-            <article className="about-card about-highlight">
+            <article className="about-card about-highlight reveal">
               <p>
                 I am <strong>{profile.name}</strong>, a Computer Science and Engineering student
                 focused on machine learning, deep learning, computer vision, and building reliable
@@ -205,7 +230,7 @@ function App() {
                 model development to deployment workflows and user-facing experiences.
               </p>
             </article>
-            <article className="about-card">
+            <article className="about-card reveal">
               <div className="about-photo-card">
                 <img src={profile.photo} alt="Portrait of Md. Imran Hossain Sayem" loading="lazy" />
               </div>
@@ -222,7 +247,7 @@ function App() {
           </div>
         </section>
 
-        <section className="content-section" id="skills">
+        <section className="content-section reveal" id="skills">
           <SectionTitle
             eyebrow="Skills"
             title="Core strengths across software, AI, and research"
@@ -231,7 +256,7 @@ function App() {
 
           <div className="skills-grid">
             {skills.map((skillGroup) => (
-              <article className="skill-card" key={skillGroup.category}>
+              <article className="skill-card reveal" key={skillGroup.category}>
                 <div className="skill-card-head">
                   <h3>{skillGroup.category}</h3>
                   <span>{skillGroup.proficiency}%</span>
@@ -249,7 +274,7 @@ function App() {
           </div>
         </section>
 
-        <section className="content-section" id="projects">
+        <section className="content-section reveal" id="projects">
           <SectionTitle
             eyebrow="Featured Projects"
             title="Projects that bridge research, AI, and impact"
@@ -258,7 +283,7 @@ function App() {
 
           <div className="projects-grid">
             {projects.map((project) => (
-              <article className="project-card" key={project.title}>
+              <article className="project-card reveal" key={project.title}>
                 <div className="project-image-wrap">
                   <img src={project.image} alt={project.title} loading="lazy" />
                 </div>
@@ -284,7 +309,7 @@ function App() {
           </div>
         </section>
 
-        <section className="content-section" id="research">
+        <section className="content-section reveal" id="research">
           <SectionTitle
             eyebrow="Research"
             title="Focused on AI, learning systems, and responsible innovation"
@@ -293,7 +318,7 @@ function App() {
 
           <div className="research-grid">
             {research.map((item) => (
-              <article className="research-card" key={item.title}>
+              <article className="research-card reveal" key={item.title}>
                 <h3>{item.title}</h3>
                 <ul>
                   {item.points.map((point) => (
@@ -302,14 +327,19 @@ function App() {
                 </ul>
               </article>
             ))}
-            <article className="research-card highlight-card">
-              <h3>Publications</h3>
+            <article className="research-card highlight-card reveal">
+              <h3>Research Interests</h3>
+              <div className="tech-badges">
+                {interests.map((interest) => (
+                  <span key={interest}>{interest}</span>
+                ))}
+              </div>
               <p>Publication details will be added as work is shared publicly.</p>
             </article>
           </div>
         </section>
 
-        <section className="content-section" id="experience">
+        <section className="content-section reveal" id="experience">
           <SectionTitle
             eyebrow="Experience"
             title="A growing path through learning, collaboration, and exploration"
@@ -318,7 +348,7 @@ function App() {
 
           <div className="timeline-list">
             {timeline.map((item) => (
-              <article className="timeline-item" key={item.title}>
+              <article className="timeline-item reveal" key={item.title}>
                 <div className="timeline-marker" />
                 <div className="timeline-content">
                   <p className="timeline-period">{item.period}</p>
@@ -330,7 +360,7 @@ function App() {
           </div>
         </section>
 
-        <section className="content-section" id="achievements">
+        <section className="content-section reveal" id="achievements">
           <SectionTitle
             eyebrow="Achievements"
             title="Momentum built through curiosity, consistency, and growth"
@@ -339,19 +369,19 @@ function App() {
 
           <div className="achievement-grid">
             {achievements.map((achievement) => (
-              <article className="achievement-card" key={achievement.label}>
+              <article className="achievement-card reveal" key={achievement.label}>
                 <h3>{achievement.value}</h3>
                 <p>{achievement.label}</p>
               </article>
             ))}
-            <article className="achievement-card">
+            <article className="achievement-card reveal">
               <h3>Open to</h3>
               <p>Research collaboration, internships, and AI-focused opportunities</p>
             </article>
           </div>
         </section>
 
-        <section className="content-section" id="contact">
+        <section className="content-section reveal" id="contact">
           <SectionTitle
             eyebrow="Contact"
             title="Let’s build something meaningful together"
@@ -359,7 +389,7 @@ function App() {
           />
 
           <div className="contact-grid">
-            <article className="contact-card">
+            <article className="contact-card reveal">
               <p className="contact-cta">
                 I’m excited to connect with people working at the edge of AI, research, and software.
               </p>
@@ -375,7 +405,7 @@ function App() {
               <p className="contact-note">{profile.email}</p>
             </article>
 
-            <form className="contact-form" onSubmit={handleSubmit}>
+            <form className="contact-form reveal" onSubmit={handleSubmit}>
               <label>
                 <span>Name</span>
                 <input type="text" name="name" value={formData.name} onChange={handleChange} />
